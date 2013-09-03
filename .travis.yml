@@ -1,0 +1,2 @@
+script:
+    mkdir -p bin; cd src; make

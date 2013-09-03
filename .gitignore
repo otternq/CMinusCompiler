@@ -1,3 +1,7 @@
+##Project Specific Stuff
+bin/calc
+
+##C++ Specific stuff
 # Compiled Object files
 *.slo
 *.lo
