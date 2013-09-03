@@ -1,2 +1,2 @@
 script:
-    cd src; make
+    mkdir -p bin; cd src; make
