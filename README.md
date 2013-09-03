@@ -1,9 +1,15 @@
 C Minus Compiler
 ==============
 
+##Compile Status
+ Master | Development 
+--------|----------------
+[![Build Status](https://travis-ci.org/otternq/CMinusCompiler.png?branch=master)](https://travis-ci.org/otternq/CMinusCompiler) | [![Build Status](https://travis-ci.org/otternq/CMinusCompiler.png?branch=development)](https://travis-ci.org/otternq/CMinusCompiler) 
+
 ##About
 A compiler for the C- language written in C++
 
 ##General
-- [C- Grammar](http://marvin.cs.uidaho.edu/Teaching/CS445/c-Grammar.pdf)
+- [C- Grammar](./docs/c-Grammar.pdf)
 - Using Flex & Bison
+- Travis CI
