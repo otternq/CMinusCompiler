@@ -1,5 +1,7 @@
 ##Project Specific Stuff
 bin/calc
+c-
+*.tar
 
 ##C++ Specific stuff
 # Compiled Object files
