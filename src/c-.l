@@ -72,6 +72,9 @@ int setVal(int linenum, int tokenClass, char * svalue) {
         case AND:
             return AND;
             break;
+        case NOT:
+            return NOT;
+            break;
         case TRUE:
             return TRUE;
             break;
@@ -133,8 +136,9 @@ int setVal(int linenum, int tokenClass, char * svalue) {
 "in"            {return setVal(line, IN, yytext);}
 "return"            {return setVal(line, RETURN, yytext);}
 "break"            {return setVal(line, BREAK, yytext);}
-"or"            {return setVal(line, IF, yytext);}
+"or"            {return setVal(line, OR, yytext);}
 "and"            {return setVal(line, AND, yytext);}
+"not"            {return setVal(line, NOT, yytext);}
 "true"            {return setVal(line, TRUE, yytext);}
 "false"            {return setVal(line, FALSE, yytext);}
 

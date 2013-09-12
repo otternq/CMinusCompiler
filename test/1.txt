@@ -3,6 +3,14 @@ a + b
 STATIC { printf(> STATIC);}
 ;:[]
 {}() + - * / %
+A--
+b++
+--
+++
+a-=b
+-=
+a+=b OR 5
++=
 <= 
 < 
 > 
@@ -15,7 +23,7 @@ STATIC { printf(> STATIC);}
 IF[0] := 't'
 IF[0] := "t"
 IF[0] := "test"
-IF[0] := "test me"
+IF[0] := "test me" NOT
 IF[0] := "test me2"
 IF[0] := "test me2 1234567890-=!@#$%^&*()_+[]{}\|"
 IF[0] := "\""

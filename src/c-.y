@@ -20,7 +20,7 @@ void yyerror(const char *msg)
 }
 
 %token<tokenData> ID NUMCONST CHARCONST STRINGCONST
-%token<value> STATIC INT BOOLEAN CHAR IF ELSE WHILE FOREACH IN RETURN BREAK OR AND TRUE FALSE GEQ LEQ EQ DEC INC PASSIGN MASSIGN
+%token<value> STATIC INT BOOLEAN CHAR IF ELSE WHILE FOREACH IN RETURN BREAK OR AND NOT TRUE FALSE GEQ LEQ EQ DEC INC PASSIGN MASSIGN
 %%
 
 
@@ -43,8 +43,8 @@ a       : ';' { printf("Line %i Token: ;\n", yylval.tokenData->linenum); }
         | '-' { printf("Line %i Token: -\n", yylval.tokenData->linenum); }
         | '*' { printf("Line %i Token: *\n", yylval.tokenData->linenum); }
         | '/' { printf("Line %i Token: /\n", yylval.tokenData->linenum); }
-        | '%' { printf("Line %i Token: modec\n", yylval.tokenData->linenum); }
-        | '!' { printf("Line %i Token: modec\n", yylval.tokenData->linenum); }
+        | '%' { printf("Line %i Token: %s\n", yylval.tokenData->linenum, yylval.tokenData->tokenStr); }
+        | '!' { printf("Line %i Token: !\n", yylval.tokenData->linenum); }
         | '\n' ;
 
         | STATIC { printf("Line %i Token: STATIC\n", yylval.tokenData->linenum); }
@@ -60,6 +60,7 @@ a       : ';' { printf("Line %i Token: ;\n", yylval.tokenData->linenum); }
         | BREAK { printf("Line %i Token: BREAK\n", yylval.tokenData->linenum); }
         | OR { printf("Line %i Token: OR\n", yylval.tokenData->linenum); }
         | AND { printf("Line %i Token: AND\n", yylval.tokenData->linenum); }
+        | NOT { printf("Line %i Token: NOT\n", yylval.tokenData->linenum); }
         | TRUE { printf("Line %i Token: TRUE\n", yylval.tokenData->linenum); }
         | FALSE { printf("Line %i Token: FALSE\n", yylval.tokenData->linenum); }
 
