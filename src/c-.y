@@ -6,6 +6,7 @@ double vars[26];
 
 #include <string.h>
 extern int yylex();
+extern FILE *yyin;
 
 void yyerror(const char *msg)
 {
@@ -80,9 +81,21 @@ a       : ';' { printf("Line %i Token: ;\n", yylval.tokenData->linenum); }
 ;
 %%
 
-int main() {
+int main(int argc, char* argv[]) {
     int i;
     yydebug = 0;
+
+    if(argc > 1) {
+        
+        //try to load file
+        FILE *myfile = fopen(argv[1], "r");
+
+        if (!myfile) {
+            printf("Can't find file: %s\n", argv[1]);
+        } else {
+            yyin = myfile;
+        }
+    }
 
     for (i = 0; i < 26; i++) {
         vars[i] = 0;

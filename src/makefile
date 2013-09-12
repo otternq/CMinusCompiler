@@ -33,3 +33,6 @@ teste:
 
 testh:
 	./c- < ../test/everything02.c-
+
+testh2:
+	./c- ../test/everything02.c-
