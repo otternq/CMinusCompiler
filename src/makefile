@@ -1,4 +1,4 @@
-BIN  = calc
+BIN  = c-
 CC   = g++
 # CFLAGS = -g
 
@@ -10,7 +10,7 @@ OBJS = lex.yy.o $(BIN).tab.o
 LIBS = -ll -lm 
 
 $(BIN): $(OBJS)
-	$(CC) $(CCFLAGS) $(OBJS) $(LIBS) -o ../bin/$(BIN)
+	$(CC) $(CCFLAGS) $(OBJS) $(LIBS) -o $(BIN)
 
 $(BIN).tab.h $(BIN).tab.c: $(BIN).y
 	bison -v -t -d $(BIN).y  
@@ -23,7 +23,16 @@ all:
 	make
 
 clean:
-	rm -f $(OBJS) lex.yy.c $(BIN).tab.h $(BIN).tab.c calc.output $(BIN).tar
+	rm -f $(OBJS) lex.yy.c $(BIN).tab.h $(BIN).tab.c c-.output $(BIN).tar calc
 
 tar:
-	tar -cvf $(BIN).tar $(SRCS) makefile 
+	tar -cvf $(BIN).tar $(SRCS) scanType.h makefile 
+
+teste:
+	./c- < ../test/1.txt
+
+testh:
+	./c- < ../test/everything02.c-
+
+testh2:
+	./c- ../test/everything02.c-
