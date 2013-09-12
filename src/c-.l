@@ -94,6 +94,10 @@ int setVal(int linenum, int tokenClass, char * svalue) {
             return EQ;
             break;
 
+        case NEQ:
+            return NEQ;
+            break;
+
         case DEC:
             return DEC;
             break;
@@ -147,6 +151,7 @@ int setVal(int linenum, int tokenClass, char * svalue) {
 
 ">="    {return setVal(line, GEQ, yytext);}
 "<="    {return setVal(line, LEQ, yytext);}
+"!="    {return setVal(line, NEQ, yytext);}
 "=="    {return setVal(line, EQ, yytext);}
 "--"    {return setVal(line, DEC, yytext);}
 "++"    {return setVal(line, INC, yytext);}
