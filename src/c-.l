@@ -39,8 +39,8 @@ int setVal(int linenum, int tokenClass, char * svalue) {
         case INT:
             return INT;
             break;
-        case BOOL:
-            return BOOL;
+        case BOOLEAN:
+            return BOOLEAN;
             break;
         case CHAR:
             return CHAR;
@@ -94,21 +94,21 @@ int setVal(int linenum, int tokenClass, char * svalue) {
 \'.\'   { return setVal(line, CHARCONST, yytext);}
 \"(\\.|[^\n"\\])*\" { return setVal(line, STRINGCONST, yytext);}
 
-"STATIC"            {return setVal(line, STATIC, yytext);}
-"INT"            {return setVal(line, IF, yytext);}
-"BOOL"            {return setVal(line, IF, yytext);}
-"CHAR"            {return setVal(line, IF, yytext);}
-"IF"            {return setVal(line, IF, yytext);}
-"ELSE"            {return setVal(line, ELSE, yytext);}
-"WHILE"            {return setVal(line, WHILE, yytext);}
-"FOREACH"            {return setVal(line, FOREACH, yytext);}
-"IN"            {return setVal(line, IN, yytext);}
-"RETURN"            {return setVal(line, RETURN, yytext);}
-"BREAK"            {return setVal(line, BREAK, yytext);}
-"OR"            {return setVal(line, IF, yytext);}
-"AND"            {return setVal(line, AND, yytext);}
-"TRUE"            {return setVal(line, TRUE, yytext);}
-"FALSE"            {return setVal(line, FALSE, yytext);}
+"static"            {return setVal(line, STATIC, yytext);}
+"int"            {return setVal(line, INT, yytext);}
+"bool"            {return setVal(line, BOOLEAN, yytext);}
+"char"            {return setVal(line, CHAR, yytext);}
+"if"            {return setVal(line, IF, yytext);}
+"else"            {return setVal(line, ELSE, yytext);}
+"while"            {return setVal(line, WHILE, yytext);}
+"foreach"            {return setVal(line, FOREACH, yytext);}
+"in"            {return setVal(line, IN, yytext);}
+"return"            {return setVal(line, RETURN, yytext);}
+"break"            {return setVal(line, BREAK, yytext);}
+"or"            {return setVal(line, IF, yytext);}
+"and"            {return setVal(line, AND, yytext);}
+"true"            {return setVal(line, TRUE, yytext);}
+"false"            {return setVal(line, FALSE, yytext);}
 
 [a-zA-Z]+[a-zA-Z0-9\_]*           {return setVal(line, ID, yytext);}
 [ \t]           ;
