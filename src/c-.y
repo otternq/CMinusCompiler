@@ -20,7 +20,7 @@ void yyerror(const char *msg)
 }
 
 %token<tokenData> ID NUMCONST CHARCONST STRINGCONST
-%token<value> STATIC INT BOOLEAN CHAR IF ELSE WHILE FOREACH IN RETURN BREAK OR AND TRUE FALSE
+%token<value> STATIC INT BOOLEAN CHAR IF ELSE WHILE FOREACH IN RETURN BREAK OR AND TRUE FALSE GEQ LEQ EQ DEC INC PASSIGN MASSIGN
 %%
 
 
@@ -63,7 +63,15 @@ a       : ';' { printf("Line %i Token: ;\n", yylval.tokenData->linenum); }
         | TRUE { printf("Line %i Token: TRUE\n", yylval.tokenData->linenum); }
         | FALSE { printf("Line %i Token: FALSE\n", yylval.tokenData->linenum); }
 
-        | NUMCONST {printf("Line %i Token: NUMBER Value %s:\n", yylval.tokenData->linenum, yylval.tokenData->tokenStr); }
+        | GEQ { printf("Line %i Token: GEQ\n", yylval.tokenData->linenum); }
+        | LEQ { printf("Line %i Token: LEQ\n", yylval.tokenData->linenum); }
+        | EQ { printf("Line %i Token: EQ\n", yylval.tokenData->linenum); }
+        | DEC { printf("Line %i Token: DEC\n", yylval.tokenData->linenum); }
+        | INC { printf("Line %i Token: INC\n", yylval.tokenData->linenum); }
+        | PASSIGN { printf("Line %i Token: PASSIGN\n", yylval.tokenData->linenum); }
+        | MASSIGN { printf("Line %i Token: MASSIGN\n", yylval.tokenData->linenum); }
+
+        | NUMCONST {printf("Line %i Token: NUMCONST Value: %s\n", yylval.tokenData->linenum, yylval.tokenData->tokenStr); }
         | CHARCONST {printf("Line %i Token: CHARCONST Value: %s\n", yylval.tokenData->linenum, yylval.tokenData->tokenStr); }
         | STRINGCONST {printf("Line %i Token: STRINGCONST Value: %s\n", yylval.tokenData->linenum, yylval.tokenData->tokenStr); }
         | ID {printf("Line %i Token: ID Value: %s\n", yylval.tokenData->linenum, yylval.tokenData->tokenStr); }

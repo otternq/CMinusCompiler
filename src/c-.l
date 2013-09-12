@@ -78,6 +78,34 @@ int setVal(int linenum, int tokenClass, char * svalue) {
         case FALSE:
             return FALSE;
             break;
+
+        case GEQ:
+            return GEQ;
+            break;
+
+        case LEQ:
+            return LEQ;
+            break;
+
+        case EQ:
+            return EQ;
+            break;
+
+        case DEC:
+            return DEC;
+            break;
+
+        case INC:
+            return INC;
+            break;
+
+        case PASSIGN:
+            return PASSIGN;
+            break;
+
+        case MASSIGN:
+            return MASSIGN;
+            break;
     }
 
     return tokenClass;
@@ -112,6 +140,14 @@ int setVal(int linenum, int tokenClass, char * svalue) {
 
 [a-zA-Z]+[a-zA-Z0-9\_]*           {return setVal(line, ID, yytext);}
 [ \t]           ;
+
+">="    {return setVal(line, GEQ, yytext);}
+"<="    {return setVal(line, LEQ, yytext);}
+"=="    {return setVal(line, EQ, yytext);}
+"--"    {return setVal(line, DEC, yytext);}
+"++"    {return setVal(line, INC, yytext);}
+"+="    {return setVal(line, PASSIGN, yytext);}
+"-="    {return setVal(line, MASSIGN, yytext);}
 
 \n              {line++; return setVal(line, yytext[0], yytext); }
 .               { return setVal(line, yytext[0], yytext); }
