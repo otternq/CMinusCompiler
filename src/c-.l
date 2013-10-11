@@ -158,6 +158,6 @@ int setVal(int linenum, int tokenClass, char * svalue) {
 "+="    {return setVal(line, PASSIGN, yytext);}
 "-="    {return setVal(line, MASSIGN, yytext);}
 
-\n              {line++; return setVal(line, yytext[0], yytext); }
+\n              {line++; }
 .               { return setVal(line, yytext[0], yytext); }
 %%

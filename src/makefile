@@ -29,7 +29,7 @@ tar:
 	tar -cvf $(BIN).tar $(SRCS) scanType.h makefile 
 
 teste:
-	./c- < ../test/1.txt
+	./c- < ../test/2.c-
 
 testh:
 	./c- < ../test/everything02.c-
