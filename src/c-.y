@@ -85,14 +85,13 @@ param-id        : ID
                 | ID '[' ']'
 ;
 
-statement       : statement_other_than_conditional 
-                | unmatched
+statement       : unmatched
                 | matched
+                | iteration-stmt
 ;
 
 statement_other_than_conditional    : expression-stmt 
                                     | compound-stmt 
-                                    | iteration-stmt 
                                     | return-stmt 
                                     | break-stmt 
 ;
@@ -120,12 +119,20 @@ matched         : IF '(' simple-expression ')' matched ELSE matched
                 | statement_other_than_conditional
 ;
 
-unmatched       : IF '(' simple-expression ')' matched
-                | IF '(' simple-expression ')' unmatched
+unmatched       : IF '(' simple-expression ')' matched ELSE unmatched
+                | IF '(' simple-expression ')' statement
 ;
 
-iteration-stmt  : WHILE '(' simple-expression ')' statement 
-                | FOREACH '(' mutable IN simple-expression ')' statement 
+iteration-stmt  : iteration-matched
+                | iteration-unmatched
+;
+
+iteration-matched   : WHILE '(' simple-expression ')' matched
+                    |   FOREACH '(' simple-expression ')' matched
+;
+
+iteration-unmatched   : WHILE '(' simple-expression ')' unmatched
+                    |   FOREACH '(' simple-expression ')' unmatched
 ;
 
 return-stmt     : RETURN ';' 
