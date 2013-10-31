@@ -7,10 +7,7 @@ double vars[26];
 
 #include <string.h>
 extern FILE *yyin;
-
-extern "C" {
-    int yylex();
-}
+extern int yylex();
 
 void yyerror(const char *msg)
 {
@@ -28,90 +25,90 @@ void yyerror(const char *msg)
 %token<value> STATIC INT BOOLEAN CHAR IF ELSE WHILE FOREACH IN RETURN BREAK OR AND NOT TRUE FALSE GEQ LEQ EQ NEQ DEC INC PASSIGN MASSIGN
 %%
 
-program         : declaration-list
+program         : declarationList
 ;
 
-declaration-list    : declaration-list declaration 
+declarationList    : declarationList declaration 
                     | declaration 
 ;
 
-declaration     : var-declaration 
-                | fun-declaration 
+declaration     : varDeclaration 
+                | funDeclaration 
 ;
 
-var-declaration     : type-specifier var-decl-list ';' 
+varDeclaration     : typeSpecifier varDeclList ';' 
 ;
 
-scoped-var-declaration  : scoped-type-specifier var-decl-list ';' 
+scopedVarDeclaration  : scopedTypeSpecifier varDeclList ';' 
 ;
 
-var-decl-list   : var-decl-list ',' var-decl-initialize 
-                | var-decl-initialize 
+varDeclList   : varDeclList ',' varDeclInitialize 
+                | varDeclInitialize 
 ;
 
-var-decl-initialize : var-decl-id 
-                    | var-decl-id ':' simple-expression
+varDeclInitialize : varDeclId 
+                    | varDeclId ':' simpleExpression
 ;
 
-var-decl-id     : ID 
+varDeclId     : ID 
                 | ID '[' NUMCONST ']' 
 ;
 
-scoped-type-specifier   : STATIC type-specifier 
-                        | type-specifier 
+scopedTypeSpecifier   : STATIC typeSpecifier 
+                        | typeSpecifier 
 ;
 
-type-specifier  : INT 
+typeSpecifier  : INT 
                 | BOOLEAN 
                 | CHAR 
 ;
 
-fun-declaration : type-specifier ID '(' params ')' statement 
+funDeclaration : typeSpecifier ID '(' params ')' statement 
                 | ID '(' params ')' statement 
 ;
 
-params          : param-list 
+params          : paramList 
                 | /* epsilone */ 
 ;
 
-param-list      : param-list ';' param-type-list 
-                | param-type-list 
+paramList      : paramList ';' paramTypeList 
+                | paramTypeList 
 ;
 
-param-type-list : type-specifier param-id-list 
+paramTypeList : typeSpecifier paramIdList 
 ;
 
-param-id-list   : param-id-list ',' param-id 
-                | param-id 
+paramIdList   : paramIdList ',' paramId 
+                | paramId 
 ;
 
-param-id        : ID 
+paramId        : ID 
                 | ID '[' ']'
 ;
 
 statement       : unmatched
                 | matched
-                | iteration-stmt
+                | iterationStmt
 ;
 
-statement_other_than_conditional    : expression-stmt 
-                                    | compound-stmt 
-                                    | return-stmt 
-                                    | break-stmt 
+statement_other_than_conditional    : expressionStmt 
+                                    | compoundStmt 
+                                    | returnStmt 
+                                    | breakStmt 
 ;
 
-compound-stmt   : '{' local-declarations statement-list '}'
+compoundStmt   : '{' localDeclarations statementList '}'
 ;
 
-local-declarations  : local-declarations scoped-var-declaration
+localDeclarations  : localDeclarations scopedVarDeclaration
                     | /* epsilon */
 ;
 
-statement-list  : statement-list statement
+statementList  : statementList statement
                 | /* epsilon */
 ;
 
-expression-stmt : expression ';'
+expressionStmt : expression ';'
                 | ';'
 ;
 
@@ -119,31 +116,31 @@ expression-stmt : expression ';'
                 | IF '(' simple-expression ')' statement ELSE statement ;
 ;*/
 
-matched         : IF '(' simple-expression ')' matched ELSE matched
+matched         : IF '(' simpleExpression ')' matched ELSE matched
                 | statement_other_than_conditional
 ;
 
-unmatched       : IF '(' simple-expression ')' matched ELSE unmatched
-                | IF '(' simple-expression ')' statement
+unmatched       : IF '(' simpleExpression ')' matched ELSE unmatched
+                | IF '(' simpleExpression ')' statement
 ;
 
-iteration-stmt  : iteration-matched
-                | iteration-unmatched
+iterationStmt  : iterationMatched
+                | iterationUnmatched
 ;
 
-iteration-matched   : WHILE '(' simple-expression ')' matched
-                    |   FOREACH '(' simple-expression ')' matched
+iterationMatched   : WHILE '(' simpleExpression ')' matched
+                    |   FOREACH '(' simpleExpression ')' matched
 ;
 
-iteration-unmatched   : WHILE '(' simple-expression ')' unmatched
-                    |   FOREACH '(' simple-expression ')' unmatched
+iterationUnmatched   : WHILE '(' simpleExpression ')' unmatched
+                    |   FOREACH '(' simpleExpression ')' unmatched
 ;
 
-return-stmt     : RETURN ';' 
+returnStmt     : RETURN ';' 
                 | RETURN expression ';' 
 ;
 
-break-stmt      : BREAK ';' 
+breakStmt      : BREAK ';' 
 ;
 
 expression      : mutable '=' expression 
@@ -151,23 +148,23 @@ expression      : mutable '=' expression
                 | mutable MASSIGN expression 
                 | mutable INC 
                 | mutable DEC 
-                | simple-expression 
+                | simpleExpression 
 ;
 
-simple-expression   : simple-expression OR and-expression 
-                    | and-expression 
+simpleExpression   : simpleExpression OR andExpression 
+                    | andExpression 
 ;
 
-and-expression  : and-expression AND unary-rel-expression 
-                | unary-rel-expression 
+andExpression  : andExpression AND unaryRelExpression 
+                | unaryRelExpression 
 ;
 
-unary-rel-expression    : NOT unary-rel-expression 
-                        | rel-expression 
+unaryRelExpression    : NOT unaryRelExpression 
+                        | relExpression 
 ;
 
-rel-expression  : sum-expression relop sum-expression 
-                | sum-expression 
+relExpression  : sumExpression relop sumExpression 
+                | sumExpression 
 ;
 
 relop           : LEQ 
@@ -178,7 +175,7 @@ relop           : LEQ
                 | NEQ 
 ;
 
-sum-expression  : sum-expression sumop term 
+sumExpression  : sumExpression sumop term 
                 | term 
 ;
 
@@ -186,8 +183,8 @@ sumop           : '+'
                 | '-' 
 ;
 
-term            : term mulop unary-expression 
-                | unary-expression 
+term            : term mulop unaryExpression 
+                | unaryExpression 
 ;
 
 mulop           : '*' 
@@ -195,7 +192,7 @@ mulop           : '*'
                 | '%' 
 ;
 
-unary-expression    : unaryop unary-expression 
+unaryExpression    : unaryop unaryExpression 
                     | factor 
 ;
 
@@ -219,11 +216,11 @@ immutable       : '(' expression ')'
 call            : ID '(' args ')' 
 ;
 
-args            : arg-list 
+args            : argList 
                 | /* epsilon */ 
 ;
 
-arg-list        : arg-list ',' expression
+argList        : argList ',' expression
                 | expression 
 ;
 
@@ -237,18 +234,18 @@ constant        : NUMCONST
 
 int main(int argc, char* argv[]) {
 
-    int debug = 0;
+    /*int debug = 0;
     int error = 0;
     int c;
     int index;
-    char *cvalue = NULL;
+    char *cvalue = NULL;*/
 
-    static char usage[] = "usage: %s [-dmp] -f fname [-s sname] name [name ...]\n";
+    //static char usage[] = "usage: %s [-dmp] -f fname [-s sname] name [name ...]\n";
 
     int i;
-    yydebug = 0;
+    yydebug = 1;
 
-    while (( c == getopt( argc, argv, "d" )) != -1 ) {
+    /*while (( c == getopt( argc, argv, "d" )) != -1 ) {
 
         switch ( c )  {
             case 'd':
@@ -274,7 +271,7 @@ int main(int argc, char* argv[]) {
         printf ("Non-option argument %s\n", argv[index]);
     }
          
-    return 0;
+    return 0;*/
 
     if(argc > 1) {
         

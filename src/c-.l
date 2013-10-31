@@ -7,7 +7,7 @@ static int line = 1;
 
 int setVal(int linenum, int tokenClass, char * svalue) {
 
-    //yylval.tokenData = TokenData();
+    yylval.tokenData = new TokenData();
     yylval.tokenData->tokenClass = tokenClass;
     yylval.tokenData->linenum = linenum;
     yylval.tokenData->tokenStr = strdup(svalue);
