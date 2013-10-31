@@ -1,5 +1,4 @@
 %{
-#include <iostream>
 #include <stdlib.h>
 #include "scanType.h"
 #include "c-.tab.h"
@@ -8,7 +7,7 @@ static int line = 1;
 
 int setVal(int linenum, int tokenClass, char * svalue) {
 
-    yylval.tokenData = new TokenData();
+    //yylval.tokenData = TokenData();
     yylval.tokenData->tokenClass = tokenClass;
     yylval.tokenData->linenum = linenum;
     yylval.tokenData->tokenStr = strdup(svalue);

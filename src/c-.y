@@ -1,12 +1,16 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "scanType.h"
 double vars[26];
 
 #include <string.h>
-extern int yylex();
 extern FILE *yyin;
+
+extern "C" {
+    int yylex();
+}
 
 void yyerror(const char *msg)
 {
@@ -232,8 +236,45 @@ constant        : NUMCONST
 %%
 
 int main(int argc, char* argv[]) {
+
+    int debug = 0;
+    int error = 0;
+    int c;
+    int index;
+    char *cvalue = NULL;
+
+    static char usage[] = "usage: %s [-dmp] -f fname [-s sname] name [name ...]\n";
+
     int i;
-    yydebug = 1;
+    yydebug = 0;
+
+    while (( c == getopt( argc, argv, "d" )) != -1 ) {
+
+        switch ( c )  {
+            case 'd':
+                debug = 1;
+                break;
+            case '?':
+                error = 1;
+                break;
+        }
+
+    }
+
+    if (error) {
+        fprintf(stderr, usage, argv[0]);
+        exit(1);
+    }
+
+    if (debug > 0) {
+        yydebug = 1;
+    }
+
+    for (index = optind; index < argc; index++) {
+        printf ("Non-option argument %s\n", argv[index]);
+    }
+         
+    return 0;
 
     if(argc > 1) {
         

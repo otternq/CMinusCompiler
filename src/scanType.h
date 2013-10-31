@@ -1,4 +1,4 @@
-struct TokenData {
+typedef struct {
     int tokenClass;
     int linenum;
     char * tokenStr;
@@ -7,4 +7,4 @@ struct TokenData {
     double numValue;
     char charValue;
     char * stringValue;
-};
+} TokenData;
