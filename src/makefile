@@ -7,10 +7,13 @@ CC   = g++
 CFLAGS = -DCPLUSPLUS -g
 SRCS = $(BIN).y $(BIN).l
 OBJS = lex.yy.o $(BIN).tab.o
+
+AUX    = tree.cpp
+
 LIBS = -ll -lm 
 
 $(BIN): $(OBJS)
-	$(CC) $(CCFLAGS) $(OBJS) $(LIBS) -o $(BIN)
+	$(CC) $(CCFLAGS) $(OBJS) $(LIBS) $(AUX) -o $(BIN)
 
 $(BIN).tab.h $(BIN).tab.c: $(BIN).y
 	bison -v -t -d $(BIN).y  

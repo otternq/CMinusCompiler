@@ -1,5 +1,6 @@
 %{
 #include <stdlib.h>
+#include "tree.h"
 #include "scanType.h"
 #include "c-.tab.h"
 

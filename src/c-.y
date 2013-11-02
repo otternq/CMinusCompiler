@@ -2,10 +2,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string>
+//#include "treeNode.h"
+#include "tree.h"
 #include "scanType.h"
+
+using namespace std;
+
 double vars[26];
 
-#include <string.h>
+
 extern FILE *yyin;
 extern int yylex();
 
@@ -14,102 +20,181 @@ void yyerror(const char *msg)
       printf("ERROR(PARSER): %s\n", msg);
 }
 
+static Tree * savedTree;
+
 %}
 
 %union {
     TokenData * tokenData;
+    Tree * tree;
     double value;
 }
 
 %token<tokenData> ID NUMCONST CHARCONST STRINGCONST
 %token<value> STATIC INT BOOLEAN CHAR IF ELSE WHILE FOREACH IN RETURN BREAK OR AND NOT TRUE FALSE GEQ LEQ EQ NEQ DEC INC PASSIGN MASSIGN
+
+%type<tree> program declarationList declaration varDeclaration scopedVarDeclaration 
+%type<tree>varDeclList varDeclInitialize varDeclId scopedTypeSpecifier typeSpecifier funDeclaration 
+%type<tree>params paramTypeList paramIdList paramId statement statement_other_than_conditional 
+%type<tree>compoundStmt localDeclarations statementList expressionStmt matched unmatched 
+%type<tree>iterationMatched iterationUnmatched returnStmt breakStmt
+%type<tree>andExpression unaryRelExpression relExpression relop sumExpression sumop term mulop 
+%type<tree>unaryExpression unaryop factor mutable immutable call args argList constant
+
+%type<tree> iterationStmt simpleExpression paramList expression
+
 %%
 
-program         : declarationList
+program         : declarationList {savedTree = $1; }
 ;
 
 declarationList    : declarationList declaration 
-                    | declaration 
+                        {
+                            $$ = new Tree("declarationList", yylval.tokenData->linenum); 
+                            $$->addSibling($2); 
+                        }
+                    | declaration { $$ = $1; }
 ;
 
-declaration     : varDeclaration 
-                | funDeclaration 
+declaration     : varDeclaration {$$ = $1;}
+                | funDeclaration {$$ = $1 }
 ;
 
 varDeclaration     : typeSpecifier varDeclList ';' 
+                        {
+                            $$ = new Tree("varDeclaration", yylval.tokenData->linenum); 
+                            $1->addSibling($2);
+                        }
 ;
 
 scopedVarDeclaration  : scopedTypeSpecifier varDeclList ';' 
+                        {
+                            $$ = new Tree("scopedVarDeclaration", yylval.tokenData->linenum); 
+                            $$->addSibling($2);
+                        }
 ;
 
 varDeclList   : varDeclList ',' varDeclInitialize 
-                | varDeclInitialize 
+                        {
+                            $$ = new Tree("varDeclList", yylval.tokenData->linenum); 
+                            $$->addSibling($3);
+                        }
+                | varDeclInitialize {$$ = $1;}
 ;
 
-varDeclInitialize : varDeclId 
+varDeclInitialize : varDeclId {$$ = $1;}
                     | varDeclId ':' simpleExpression
+                        {
+                            $$ = new Tree("varDeclInitialize", yylval.tokenData->linenum); 
+                            $$->addSibling($3);
+                        }
 ;
 
-varDeclId     : ID 
+varDeclId     : ID {$$ = new Tree("ID", yylval.tokenData->linenum); }
                 | ID '[' NUMCONST ']' 
+                        {
+                            $$ = new Tree("varDeclID", yylval.tokenData->linenum);
+                        }
 ;
 
-scopedTypeSpecifier   : STATIC typeSpecifier 
-                        | typeSpecifier 
+scopedTypeSpecifier   : STATIC typeSpecifier
+                            {
+                                $$ = new Tree("varDeclID", yylval.tokenData->linenum); 
+                                $$->addSibling($2);
+                            }
+                        | typeSpecifier {$$ = $1}
 ;
 
-typeSpecifier  : INT 
-                | BOOLEAN 
-                | CHAR 
+typeSpecifier  : INT {$$ = new Tree("int", yylval.tokenData->linenum); }
+                | BOOLEAN {$$ = new Tree("boolean", yylval.tokenData->linenum); }
+                | CHAR {$$ = new Tree("char", yylval.tokenData->linenum); }
 ;
 
 funDeclaration : typeSpecifier ID '(' params ')' statement 
+                        {
+                            $$ = new Tree("funDeclartion", yylval.tokenData->linenum); 
+                            $$->addSibling($1);
+
+                            $$->addChild($4);
+
+                            $$->addSibling($6);
+                        }
                 | ID '(' params ')' statement 
+                    {
+                        $$ = new Tree("funDeclartion", yylval.tokenData->linenum);
+                        $$->addChild($3);
+                        $$->addChild($5);
+                    }
 ;
 
-params          : paramList 
-                | /* epsilone */ 
+params          : paramList {$$ = $1;}
+                | {$$ = NULL} /* epsilone */ 
 ;
 
-paramList      : paramList ';' paramTypeList 
-                | paramTypeList 
+paramList      : paramList ';' paramTypeList
+                    {
+                        $$ = new Tree("paramList", yylval.tokenData->linenum); 
+                        $$->addChild($3);
+                    }
+                | paramTypeList {$$ = $1;}
 ;
 
 paramTypeList : typeSpecifier paramIdList 
+                    {
+                        $$ = new Tree("paramTypeList", yylval.tokenData->linenum);
+                        $$->addSibling($2);
+                    }
 ;
 
 paramIdList   : paramIdList ',' paramId 
-                | paramId 
+                    {
+                        $$ = new Tree("paramList", yylval.tokenData->linenum);
+                        $$->addSibling($3);
+                    }
+                | paramId {$$ = $1;}
 ;
 
-paramId        : ID 
-                | ID '[' ']'
+paramId        : ID {$$ = new Tree("paramId", yylval.tokenData->linenum);}
+                | ID '[' ']' {$$ = new Tree("paramId", yylval.tokenData->linenum);}
 ;
 
-statement       : unmatched
-                | matched
-                | iterationStmt
+statement       : unmatched {$$ = $1;}
+                | matched {$$ = $1;}
+                | iterationStmt {$$ = $1;}
 ;
 
-statement_other_than_conditional    : expressionStmt 
-                                    | compoundStmt 
-                                    | returnStmt 
-                                    | breakStmt 
+statement_other_than_conditional    : expressionStmt {$$ = $1;}
+                                    | compoundStmt {$$ = $1;}
+                                    | returnStmt {$$ = $1;}
+                                    | breakStmt {$$ = $1;}
 ;
 
 compoundStmt   : '{' localDeclarations statementList '}'
+                    {
+                        $$ = new Tree("compoundStmt", yylval.tokenData->linenum);
+                        $$->addChild($2);
+                        $$->addChild($3);
+                    }
 ;
 
 localDeclarations  : localDeclarations scopedVarDeclaration
-                    | /* epsilon */
+                    {
+                        $$ = new Tree("localDeclarations", yylval.tokenData->linenum);
+                        $$->addChild($2);
+                    }
+                    | {$$ = NULL} /* epsilon */
 ;
 
 statementList  : statementList statement
-                | /* epsilon */
+                    {
+                        $$ = new Tree("statementList", yylval.tokenData->linenum);
+                        $$->addChild($2);
+                    }
+                | {$$ = NULL} /* epsilon */
 ;
 
-expressionStmt : expression ';'
-                | ';'
+expressionStmt : expression ';' {$$ = $1;}
+                | ';' {$$ = new Tree("semi colon", yylval.tokenData->linenum);}
 ;
 
 /*selection-stmt  : IF '(' simple-expression ')' statement ;
@@ -117,118 +202,227 @@ expressionStmt : expression ';'
 ;*/
 
 matched         : IF '(' simpleExpression ')' matched ELSE matched
-                | statement_other_than_conditional
+                    {
+                        $$ = new Tree("If stmt", yylval.tokenData->linenum);
+                        $$->addChild($3);
+                        $$->addChild($5);
+                        $$->addChild($7);
+                    }
+                | statement_other_than_conditional {$$ = $1;}
 ;
 
 unmatched       : IF '(' simpleExpression ')' matched ELSE unmatched
+                    {
+                        $$ = new Tree("If stmt", yylval.tokenData->linenum);
+                        $$->addChild($3);
+                        $$->addChild($5);
+                        $$->addChild($7);
+                    }
                 | IF '(' simpleExpression ')' statement
+                    {
+                        $$ = new Tree("If stmt", yylval.tokenData->linenum);
+                        $$->addChild($3);
+                        $$->addChild($5);
+                    }
 ;
 
-iterationStmt  : iterationMatched
-                | iterationUnmatched
+iterationStmt  : iterationMatched {$$ = $1;}
+                | iterationUnmatched {$$ = $1;}
 ;
 
 iterationMatched   : WHILE '(' simpleExpression ')' matched
+                        {
+                            $$ = new Tree("iterationMatched", yylval.tokenData->linenum);
+                            $$->addSibling($3);
+                            $$->addChild($5);
+                        }
                     |   FOREACH '(' simpleExpression ')' matched
+                        {
+                            $$ = new Tree("iterationMatched", yylval.tokenData->linenum);
+                            $$->addChild($3);
+                            $$->addChild($5);
+                        }
 ;
 
 iterationUnmatched   : WHILE '(' simpleExpression ')' unmatched
+                        {
+                            $$ = new Tree("iterationUnmatched", yylval.tokenData->linenum);
+                            $$->addChild($3);
+                            $$->addChild($5);
+                        }
                     |   FOREACH '(' simpleExpression ')' unmatched
+                        {
+                            $$ = new Tree("iterationUnmatched", yylval.tokenData->linenum);
+                            $$->addChild($3);
+                            $$->addChild($5);
+                        }
 ;
 
-returnStmt     : RETURN ';' 
+returnStmt     : RETURN ';' {$$ = new Tree("return", yylval.tokenData->linenum);}
                 | RETURN expression ';' 
+                    {
+                        $$ = new Tree("return", yylval.tokenData->linenum);
+                        $$->addSibling($2);
+                    }
 ;
 
-breakStmt      : BREAK ';' 
+breakStmt      : BREAK ';' {$$ = new Tree("break", yylval.tokenData->linenum);}
 ;
 
 expression      : mutable '=' expression 
+                    {
+                        $$ = new Tree("expression", yylval.tokenData->linenum);
+                        $$->addSibling($1);
+                        $$->addSibling($3);
+                    }
                 | mutable PASSIGN expression 
+                    {
+                        $$ = new Tree("expression", yylval.tokenData->linenum);
+                        $$->addSibling($1);
+                        $$->addSibling($3);
+                    }
                 | mutable MASSIGN expression 
+                    {
+                        $$ = new Tree("expression", yylval.tokenData->linenum);
+                        $$->addSibling($1);
+                        $$->addSibling($3);
+                    }
                 | mutable INC 
+                    {
+                        $$ = new Tree("expression", yylval.tokenData->linenum);
+                        $$->addSibling($1);
+                    }
                 | mutable DEC 
-                | simpleExpression 
+                    {
+                        $$ = new Tree("expression", yylval.tokenData->linenum);
+                        $$->addSibling($1);
+                    }
+                | simpleExpression {$$ = $1}
 ;
 
 simpleExpression   : simpleExpression OR andExpression 
-                    | andExpression 
+                        {
+                            $$ = new Tree("simpleExpression", yylval.tokenData->linenum);
+                            $$->addSibling($1);
+                            $$->addSibling($3);
+                        }
+                    | andExpression {$$ = $1;}
 ;
 
 andExpression  : andExpression AND unaryRelExpression 
-                | unaryRelExpression 
+                    {
+                        $$ = new Tree("andExpression", yylval.tokenData->linenum);
+                        $$->addSibling($1);
+                        $$->addSibling($3);
+                    }
+                | unaryRelExpression {$$ = $1;}
 ;
 
 unaryRelExpression    : NOT unaryRelExpression 
-                        | relExpression 
+                            {
+                                $$ = new Tree("unaryRelExpression", yylval.tokenData->linenum);
+                                $$->addSibling($2);
+                            }
+                        | relExpression {$$ = $1;}
 ;
 
 relExpression  : sumExpression relop sumExpression 
-                | sumExpression 
+                    {
+                        $$ = new Tree("relExpression", yylval.tokenData->linenum);
+                        $$->addSibling($2);
+                        $$->addSibling($3);
+                    }
+                | sumExpression {$$ = $1;}
 ;
 
-relop           : LEQ 
-                | '<' 
-                | '>' 
-                | GEQ 
-                | EQ  
-                | NEQ 
+relop           : LEQ {$$ = new Tree("LEQ", yylval.tokenData->linenum);}
+                | '<' {$$ = new Tree("<", yylval.tokenData->linenum);}
+                | '>' {$$ = new Tree(">", yylval.tokenData->linenum);}
+                | GEQ {$$ = new Tree("GEQ", yylval.tokenData->linenum);}
+                | EQ  {$$ = new Tree("EQ", yylval.tokenData->linenum);}
+                | NEQ {$$ = new Tree("NEQ", yylval.tokenData->linenum);}
 ;
 
 sumExpression  : sumExpression sumop term 
-                | term 
+                    {
+                        $$ = new Tree("sumExpression", yylval.tokenData->linenum);
+                        $$->addSibling($2);
+                        $$->addSibling($3);
+                    }
+                | term {$$ = $1;}
 ;
 
-sumop           : '+' 
-                | '-' 
+sumop           : '+' {$$ = new Tree("+", yylval.tokenData->linenum);}
+                | '-' {$$ = new Tree("-", yylval.tokenData->linenum);}
 ;
 
 term            : term mulop unaryExpression 
-                | unaryExpression 
+                    {
+                        $$ = new Tree("term", yylval.tokenData->linenum);
+                        $$->addSibling($2);
+                        $$->addSibling($3);
+                    }
+                | unaryExpression {$$ = $1;}
 ;
 
-mulop           : '*' 
-                | '/' 
-                | '%' 
+mulop           : '*' {$$ = new Tree("*", yylval.tokenData->linenum);}
+                | '/' {$$ = new Tree("/", yylval.tokenData->linenum);}
+                | '%' {$$ = new Tree("%", yylval.tokenData->linenum);}
 ;
 
 unaryExpression    : unaryop unaryExpression 
-                    | factor 
+                        {
+                            $$ = new Tree("unaryExpression", yylval.tokenData->linenum);
+                            $$->addSibling($2);
+                        }
+                    | factor {$$ = new Tree("factor", yylval.tokenData->linenum);}
 ;
 
-unaryop         : '-' 
-                | '*' 
+unaryop         : '-' {$$ = new Tree("-", yylval.tokenData->linenum);}
+                | '*' {$$ = new Tree("+", yylval.tokenData->linenum);}
 ;
 
-factor          : immutable 
-                | mutable 
+factor          : immutable {$$ = $1;}
+                | mutable {$$ = $1;}
 ;
 
-mutable         : ID 
+mutable         : ID {$$ = new Tree("ID", yylval.tokenData->linenum);}
                 | ID '[' expression ']' 
+                    {
+                        $$ = new Tree("ID", yylval.tokenData->linenum);
+                        $$->addChild($3);
+                    }
 ;
 
-immutable       : '(' expression ')' 
-                | call 
-                | constant 
+immutable       : '(' expression ')' {$$ = $2}
+                | call {$$ = $1;}
+                | constant {$$ = $1;}
 ;
 
 call            : ID '(' args ')' 
+                    {
+                        $$ = new Tree("call", yylval.tokenData->linenum);
+                        $$->addSibling($3);
+                    }
 ;
 
-args            : argList 
-                | /* epsilon */ 
+args            : argList {$$ = $1;}
+                | {$$ = NULL }/* epsilon */ 
 ;
 
 argList        : argList ',' expression
-                | expression 
+                    {
+                        $$ = new Tree("arglist", yylval.tokenData->linenum);
+                        $$->addSibling($3);
+                    }
+                | expression {$$ = $1;}
 ;
 
-constant        : NUMCONST 
-                | CHARCONST 
-                | STRINGCONST 
-                | TRUE 
-                | FALSE 
+constant        : NUMCONST {$$ = new Tree("NUMCONST", yylval.tokenData->linenum);}
+                | CHARCONST {$$ = new Tree("CHARCONST", yylval.tokenData->linenum);}
+                | STRINGCONST {$$ = new Tree("STRINGCONST", yylval.tokenData->linenum);}
+                | TRUE {$$ = new Tree("TRUE", yylval.tokenData->linenum);}
+                | FALSE {$$ = new Tree("FALSE", yylval.tokenData->linenum);}
 ;
 %%
 
@@ -243,7 +437,7 @@ int main(int argc, char* argv[]) {
     //static char usage[] = "usage: %s [-dmp] -f fname [-s sname] name [name ...]\n";
 
     int i;
-    yydebug = 1;
+    //yydebug = 1;
 
     /*while (( c == getopt( argc, argv, "d" )) != -1 ) {
 
@@ -290,4 +484,6 @@ int main(int argc, char* argv[]) {
     }
 
     yyparse(); //call the parser
+
+    savedTree->print(0);
 }
